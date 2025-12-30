@@ -628,18 +628,7 @@ body.modal-open .modal * {
 /* =========================
    MOBILE CALENDAR FIX
    ========================= */
-@media (max-width: 600px) {
-    .calendar {
-        grid-auto-rows: 72px; 
-        row-gap: 10px;    /* 🔥 FIX row height */
-    }
 
-    .day {
-        height: 72px;           /* 🔥 LOCK height */
-        overflow: hidden;       /* prevent expansion */
-        padding: 6px;
-    }
-}
 @media (max-width: 600px) {
     .event-list {
         max-height: 38px;       /* fits inside cell */
@@ -658,14 +647,7 @@ body.modal-open .modal * {
 /* =========================
    MOBILE GRID SPACING FIX
    ========================= */
-@media (max-width: 600px) {
-    .calendar {
-        grid-auto-rows: 72px;
-        row-gap: 10px;          /* 🔥 THIS is missing */
-        column-gap: 6px;
-        padding: 10px;
-    }
-}
+
 @media (max-width: 600px) {
     .day {
         height: 72px;
@@ -683,7 +665,7 @@ body.modal-open .modal * {
 @media (max-width: 600px) {
 
     .calendar {
-        gap: 10px;
+        gap: 15px;
         padding: 10px;
     }
 
