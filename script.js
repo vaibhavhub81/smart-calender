@@ -1,22 +1,49 @@
+/* =========================
+   FIREBASE IMPORTS
+   ========================= */
+import { db } from "./firebase.js";
+import {
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* =========================
+   DOM REFERENCES
+   ========================= */
 const calendar = document.getElementById("calendar");
 const monthYear = document.getElementById("monthYear");
 const modal = document.getElementById("eventModal");
 const detailBox = document.getElementById("eventDetail");
 const detailContent = document.getElementById("detailContent");
 
-const YEAR = 2026;
-let currentMonth = 0;
-let events = JSON.parse(localStorage.getItem("events2026")) || [];
-let selectedEventIndex = null;
-// =========================
-// SIDEBAR TOGGLE LOGIC
-// =========================
 const sidebar = document.querySelector(".sidebar");
 const menuBtn = document.getElementById("menuBtn");
 
-menuBtn.onclick = () => {
-    sidebar.classList.toggle("open");
-};
+const saveBtn = document.getElementById("saveEvent");
+
+/* =========================
+   STATE
+   ========================= */
+const YEAR = 2026;
+let currentMonth = 0;
+let events = [];
+let selectedEventId = null;
+
+/* =========================
+   FIRESTORE REF
+   ========================= */
+const eventsRef = collection(db, "events2026");
+
+/* =========================
+   SIDEBAR TOGGLE
+   ========================= */
+menuBtn.onclick = () => sidebar.classList.toggle("open");
+
 document.addEventListener("click", (e) => {
     if (
         sidebar.classList.contains("open") &&
@@ -27,8 +54,27 @@ document.addEventListener("click", (e) => {
     }
 });
 
+/* =========================
+   REALTIME LISTENER
+   ========================= */
+function listenToEvents() {
+    const q = query(eventsRef, orderBy("createdAt"));
+
+    onSnapshot(q, (snapshot) => {
+        events = snapshot.docs.map(d => ({
+            id: d.id,
+            ...d.data()
+        }));
+        renderCalendar();
+    });
+}
+
+/* =========================
+   CALENDAR RENDER
+   ========================= */
 function renderCalendar() {
     calendar.innerHTML = "";
+
     const date = new Date(YEAR, currentMonth, 1);
     monthYear.textContent =
         date.toLocaleString("default", { month: "long" }) + " 2026";
@@ -47,13 +93,18 @@ function renderCalendar() {
 
         const key = `${YEAR}-${String(currentMonth + 1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 
-        // ✅ GUARANTEED HIGHLIGHT
-        const ev = events.find(e => e.days.includes(key));
-        if (ev) {
-            cell.classList.add(ev.priority);
-        }
-        const dayEvents = events.filter(e => e.days.includes(key));
+        const dayEvents = events.filter(
+            e => Array.isArray(e.days) && e.days.includes(key)
+        );
+
         if (dayEvents.length > 0) {
+            const priorityRank = { high: 3, medium: 2, low: 1 };
+            const top = dayEvents.reduce((a, b) =>
+                priorityRank[b.priority] > priorityRank[a.priority] ? b : a
+            );
+
+            cell.classList.add(top.priority);
+
             const list = document.createElement("div");
             list.className = "event-list";
 
@@ -67,23 +118,19 @@ function renderCalendar() {
             cell.appendChild(list);
         }
 
-
         cell.onclick = () => showEvent(key);
         calendar.appendChild(cell);
     }
 }
 
-
-function getEventForDay(dayKey) {
-    return events.find(ev => ev.days.includes(dayKey));
-}
-
+/* =========================
+   EVENT DETAIL
+   ========================= */
 function showEvent(dayKey) {
-    const index = events.findIndex(ev => ev.days.includes(dayKey));
-    if (index === -1) return;
+    const ev = events.find(e => e.days.includes(dayKey));
+    if (!ev) return;
 
-    selectedEventIndex = index;
-    const ev = events[index];
+    selectedEventId = ev.id;
 
     detailBox.className = `event-detail ${ev.priority}`;
     detailContent.innerHTML = `
@@ -99,176 +146,203 @@ function showEvent(dayKey) {
 document.getElementById("closeDetail").onclick = () =>
     detailBox.style.display = "none";
 
+/* =========================
+   MODAL CONTROLS
+   ========================= */
 document.getElementById("addEventBtn").onclick = () => {
-    sidebar.classList.remove("open");     // close sidebar
-    document.body.classList.add("modal-open"); // 🔥 IMPORTANT
+    sidebar.classList.remove("open");
+    document.body.classList.add("modal-open");
     modal.style.display = "flex";
 };
 
-
 document.getElementById("closeModal").onclick = () => {
     modal.style.display = "none";
-    document.body.classList.remove("modal-open"); // 🔥 IMPORTANT
+    document.body.classList.remove("modal-open");
 };
 
+/* =========================
+   SAVE EVENT (FIXED)
+   ========================= */
+saveBtn.onclick = async () => {
+    if (saveBtn.disabled) return;
 
-document.getElementById("saveEvent").onclick = () => {
-    //const start = new Date(startDate.value);
-    const start = new Date(startDate.value + "T00:00:00");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
 
-    const recurrence = document.getElementById("recurrence").value;
+    try {
+        const start = new Date(startDate.value + "T00:00:00");
+        const recurrence = document.getElementById("recurrence").value;
 
-    let end;
-if (recurrence === "none") {
-    const endInput = endDate.value || startDate.value;
-    end = new Date(
-        endInput + "T23:59:59"
-    );
-} else {
-    end = new Date(YEAR, 11, 31, 23, 59, 59);
-}
+        let end;
+        if (recurrence === "none") {
+            const endInput = endDate.value || startDate.value;
+            end = new Date(endInput + "T23:59:59");
+        } else {
+            end = new Date(YEAR, 11, 31, 23, 59, 59);
+        }
 
-    const days = [];
-    let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const days = [];
+        let cursor = new Date(start);
 
+        while (cursor <= end) {
+            days.push(
+                `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,"0")}-${String(cursor.getDate()).padStart(2,"0")}`
+            );
 
-    while (cursor <= end) {
-    days.push(
-        `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2,"0")}-${String(cursor.getDate()).padStart(2,"0")}`
-    );
+            if (recurrence === "daily") cursor.setDate(cursor.getDate() + 1);
+            else if (recurrence === "weekly") cursor.setDate(cursor.getDate() + 7);
+            else if (recurrence === "monthly") cursor.setMonth(cursor.getMonth() + 1);
+            else cursor.setDate(cursor.getDate() + 1);
+        }
 
-    if (recurrence === "none") {
-        cursor.setDate(cursor.getDate() + 1);
+        await addDoc(eventsRef, {
+            title: title.value,
+            startDate: startDate.value,
+            endDate: endDate.value || startDate.value,
+            priority: priority.value,
+            team: team.value,
+            meetingLink: meetingLink.value,
+            agenda: agenda.value,
+            recurrence,
+            days,
+            createdAt: Date.now()
+        });
+
+        modal.style.display = "none";
+        document.body.classList.remove("modal-open");
+
+    } catch (err) {
+        console.error("Save failed:", err);
+        alert("Failed to save event. Check console.");
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save";
     }
-    else if (recurrence === "daily") {
-        cursor.setDate(cursor.getDate() + 1);
-    }
-    else if (recurrence === "weekly") {
-        cursor.setDate(cursor.getDate() + 7);
-    }
-    else if (recurrence === "monthly") {
-        const originalDay = cursor.getDate();
-
-        cursor.setMonth(cursor.getMonth() + 1, 1);
-
-        const lastDayOfMonth = new Date(
-            cursor.getFullYear(),
-            cursor.getMonth() + 1,
-            0
-        ).getDate();
-
-        cursor.setDate(Math.min(originalDay, lastDayOfMonth));
-    }
-}
-
-
-
-
-    events.push({
-        title: title.value,
-        startDate: startDate.value,
-        endDate: endDate.value || startDate.value,
-        priority: priority.value,
-        team: team.value,
-        meetingLink: meetingLink.value,
-        agenda: agenda.value,
-        recurrence,
-        days
-    });
-
-    localStorage.setItem("events2026", JSON.stringify(events));
-    modal.style.display = "none";
-    renderCalendar();
 };
 
-document.getElementById("editEvent").onclick = () => {
-    const ev = events[selectedEventIndex];
-    title.value = ev.title;
-    startDate.value = ev.startDate;
-    endDate.value = ev.endDate;
-    priority.value = ev.priority;
-    team.value = ev.team;
-    meetingLink.value = ev.meetingLink;
-    agenda.value = ev.agenda;
-    modal.style.display = "block";
+/* =========================
+   DELETE EVENT
+   ========================= */
+document.getElementById("deleteEvent").onclick = async () => {
+    if (!selectedEventId) return;
+    await deleteDoc(doc(db, "events2026", selectedEventId));
+    detailBox.style.display = "none";
 };
 
-document.getElementById("deleteEvent").onclick = () => {
-    if (selectedEventIndex !== null) {
-        events.splice(selectedEventIndex, 1);
-        localStorage.setItem("events2026", JSON.stringify(events));
-        detailBox.style.display = "none";
+/* =========================
+   MONTH NAVIGATION
+   ========================= */
+document.getElementById("prevMonth").onclick = () => {
+    if (currentMonth > 0) {
+        currentMonth--;
         renderCalendar();
     }
 };
 
-document.getElementById("prevMonth").onclick = () => {
-    if (currentMonth > 0) currentMonth--;
-    renderCalendar();
-};
-
 document.getElementById("nextMonth").onclick = () => {
-    if (currentMonth < 11) currentMonth++;
-    renderCalendar();
+    if (currentMonth < 11) {
+        currentMonth++;
+        renderCalendar();
+    }
 };
-
 document.getElementById("exportPdf").onclick = () => {
+    sidebar.classList.remove("open");
+
+    const monthKey = `${YEAR}-${String(currentMonth + 1).padStart(2, "0")}`;
+
     const monthEvents = events.filter(e =>
-        e.days.some(d =>
-            d.startsWith(`${YEAR}-${String(currentMonth + 1).padStart(2,"0")}`)
-        )
+        e.days.some(d => d.startsWith(monthKey))
     );
 
+    if (monthEvents.length === 0) {
+        alert("No events for this month");
+        return;
+    }
+
     let html = `
-    <html><head><style>
-    body{font-family:Arial;padding:20px;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{border:1px solid #333;padding:8px;font-size:12px;}
-    th{background:#eee;}
-    </style></head><body>
-    <h2>${monthYear.textContent}</h2>
-    <table>
-    <tr><th>Title</th><th>Date</th><th>Priority</th><th>Team</th><th>Agenda</th></tr>`;
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #333; padding: 8px; font-size: 12px; }
+            th { background: #eee; }
+        </style>
+    </head>
+    <body>
+        <h2>${monthYear.textContent}</h2>
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Priority</th>
+                <th>Team</th>
+                <th>Agenda</th>
+            </tr>`;
 
     monthEvents.forEach(e => {
-        html += `<tr>
-        <td>${e.title}</td>
-        <td>${e.startDate} → ${e.endDate}</td>
-        <td>${e.priority}</td>
-        <td>${e.team || "-"}</td>
-        <td>${e.agenda || "-"}</td>
+        html += `
+        <tr>
+            <td>${e.title}</td>
+            <td>${e.startDate} → ${e.endDate}</td>
+            <td>${e.priority}</td>
+            <td>${e.team || "-"}</td>
+            <td>${e.agenda || "-"}</td>
         </tr>`;
     });
 
     html += `</table></body></html>`;
+
     const win = window.open("", "_blank");
     win.document.write(html);
     win.print();
 };
-
 document.getElementById("aiStats").onclick = () => {
-    const monthEvents = events.filter(e =>
-        e.days.some(d =>
-            d.startsWith(`${YEAR}-${String(currentMonth + 1).padStart(2,"0")}`)
-        )
-    );
-    const high = monthEvents.filter(e => e.priority === "high").length;
-    alert(`📊 AI Analysis\n\nTotal Events: ${monthEvents.length}\nHigh Priority: ${high}`);
-};
+    sidebar.classList.remove("open");
 
+    const monthKey = `${YEAR}-${String(currentMonth + 1).padStart(2, "0")}`;
+
+    const monthEvents = events.filter(e =>
+        e.days.some(d => d.startsWith(monthKey))
+    );
+
+    const high = monthEvents.filter(e => e.priority === "high").length;
+    const medium = monthEvents.filter(e => e.priority === "medium").length;
+    const low = monthEvents.filter(e => e.priority === "low").length;
+
+    alert(
+        `📊 AI Monthly Stats\n\n` +
+        `Total Events: ${monthEvents.length}\n` +
+        `High Priority: ${high}\n` +
+        `Medium Priority: ${medium}\n` +
+        `Low Priority: ${low}`
+    );
+};
 document.getElementById("agendaSummary").onclick = () => {
+    sidebar.classList.remove("open");
+
+    const monthKey = `${YEAR}-${String(currentMonth + 1).padStart(2, "0")}`;
+
+    const monthEvents = events.filter(e =>
+        e.days.some(d => d.startsWith(monthKey))
+    );
+
+    if (monthEvents.length === 0) {
+        alert("No agenda for this month");
+        return;
+    }
+
     let text = "📅 Monthly Agenda\n\n";
-    events.forEach(e => {
-        if (e.days.some(d =>
-            d.startsWith(`${YEAR}-${String(currentMonth + 1).padStart(2,"0")}`)
-        )) {
-            text += `• ${e.title} (${e.startDate})\n`;
-        }
+
+    monthEvents.forEach(e => {
+        text += `• ${e.title} (${e.startDate})\n`;
     });
+
     alert(text);
 };
-modal.style.display = "none";
-document.body.classList.remove("modal-open"); // 🔥 IMPORTANT
 
-
+/* =========================
+   START APP
+   ========================= */
+listenToEvents();
 renderCalendar();
