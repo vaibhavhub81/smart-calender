@@ -666,37 +666,27 @@ body.modal-open .modal * {
 
     /* ===== CALENDAR GRID ===== */
     .calendar {
-        --gap-x: 8px;
-        --gap-y: 16px;
-        --side-padding: 8px;
-
         display: grid;
-        grid-template-columns: repeat(
-            7,
-            minmax(0, 1fr)
-        );
-
-        column-gap: var(--gap-x);
-        row-gap: var(--gap-y);
-
-        padding: var(--side-padding);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        row-gap: 26px;          /* vertical spacing */
+        column-gap: 20px;       /* horizontal spacing */
+        padding: 8px;
     }
 
     /* ===== DAY CELL ===== */
     .day {
-        width: 100%;
-        aspect-ratio: 1 / 1.25;   /* shrinks height when width shrinks */
+        aspect-ratio: 1 / 1.3;   /* balanced height */
         padding: 6px;
+        overflow: hidden;
 
         display: flex;
         flex-direction: column;
         justify-content: space-between;
 
-        overflow: hidden;
         border-radius: 14px;
     }
 
-    /* ===== DATE ===== */
+    /* ===== DATE NUMBER ===== */
     .day span {
         font-size: 12px;
         font-weight: 500;
@@ -704,7 +694,7 @@ body.modal-open .modal * {
 
     /* ===== EVENTS ===== */
     .event-list {
-        max-height: 30%;
+        max-height: 32px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -715,11 +705,11 @@ body.modal-open .modal * {
         font-size: 10px;
         line-height: 1.2;
         padding: 2px 4px;
+        border-radius: 6px;
 
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        border-radius: 6px;
     }
 }
 
