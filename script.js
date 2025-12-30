@@ -99,11 +99,18 @@ function showEvent(dayKey) {
 document.getElementById("closeDetail").onclick = () =>
     detailBox.style.display = "none";
 
-document.getElementById("addEventBtn").onclick = () =>
-    modal.style.display = "block";
+document.getElementById("addEventBtn").onclick = () => {
+    sidebar.classList.remove("open");     // close sidebar
+    document.body.classList.add("modal-open"); // 🔥 IMPORTANT
+    modal.style.display = "flex";
+};
 
-document.getElementById("closeModal").onclick = () =>
+
+document.getElementById("closeModal").onclick = () => {
     modal.style.display = "none";
+    document.body.classList.remove("modal-open"); // 🔥 IMPORTANT
+};
+
 
 document.getElementById("saveEvent").onclick = () => {
     //const start = new Date(startDate.value);
@@ -260,5 +267,8 @@ document.getElementById("agendaSummary").onclick = () => {
     });
     alert(text);
 };
+modal.style.display = "none";
+document.body.classList.remove("modal-open"); // 🔥 IMPORTANT
+
 
 renderCalendar();

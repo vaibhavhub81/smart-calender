@@ -517,4 +517,111 @@ header {
     font-weight: 600;
     letter-spacing: 0.5px;
 }
+/* =========================
+   MOBILE HEADER FIX
+   ========================= */
+@media (max-width: 600px) {
+    .calendar-header {
+        min-height: 64px;       /* smaller than desktop */
+        padding: 12px 12px;
+    }
 
+    .month-title h2 {
+        font-size: 18px;
+    }
+
+    .calendar-header button {
+        height: 38px;
+        min-width: 38px;
+        font-size: 16px;
+    }
+}
+/* =========================
+   MOBILE SIDEBAR OVERLAY
+   ========================= */
+@media (max-width: 600px) {
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #020617;
+        transform: translateX(-100%);
+        z-index: 2000;
+        box-shadow: 10px 0 40px rgba(0,0,0,0.7);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+}
+/* =========================
+   MOBILE MODAL FIX
+   ========================= */
+@media (max-width: 600px) {
+    .modal-content {
+        width: calc(100% - 24px);
+        max-height: 85vh;
+        margin-bottom: env(safe-area-inset-bottom);
+        border-radius: 16px;
+    }
+
+    .modal-actions {
+        position: sticky;
+        bottom: 0;
+        background: #020617;
+        padding-bottom: 12px;
+    }
+}
+@media (max-width: 600px) {
+    .day {
+        min-height: 64px;
+        padding: 6px;
+    }
+
+    .day span {
+        font-size: 12px;
+    }
+
+    .event-title {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+}
+
+/* =========================
+   MODAL – GLOBAL TOP LAYER
+   ========================= */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;              /* higher than EVERYTHING */
+    align-items: center;
+    justify-content: center;
+}
+/* =========================
+   DISABLE BACKGROUND ON MODAL
+   ========================= */
+body.modal-open .calendar-header,
+body.modal-open .sidebar,
+body.modal-open .main-content {
+    pointer-events: none;
+}
+
+/* Keep modal clickable */
+body.modal-open .modal,
+body.modal-open .modal * {
+    pointer-events: auto;
+}
+.calendar-header {
+    position: relative;
+    z-index: 100;
+}
+
+.sidebar {
+    z-index: 500;
+}
