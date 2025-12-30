@@ -665,7 +665,7 @@ body.modal-open .modal * {
 @media (max-width: 600px) {
 
     .calendar {
-        gap: 15px;
+        gap: 25px;
         padding: 10px;
     }
 
