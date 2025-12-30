@@ -630,7 +630,8 @@ body.modal-open .modal * {
    ========================= */
 @media (max-width: 600px) {
     .calendar {
-        grid-auto-rows: 72px;   /* 🔥 FIX row height */
+        grid-auto-rows: 72px; 
+        row-gap: 10px;    /* 🔥 FIX row height */
     }
 
     .day {
