@@ -1,0 +1,8 @@
+{
+  "name": "SmartCal 2026",
+  "short_name": "SmartCal",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#22c55e"
+}

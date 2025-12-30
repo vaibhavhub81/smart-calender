@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2026 Event Calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">📅 SmartCal</div>
+    <button id="exportPdf">📄 Export Month PDF</button>
+    <button id="aiStats">🧠 AI Monthly Stats</button>
+    <button id="agendaSummary">🗂 Monthly Agenda</button>
+    <button id="installPWA" hidden>⬇️ Install App</button>
+</div>
+
+<div class="main-content">
+
+<header>
+    <button id="prevMonth">◀</button>
+    <h2 id="monthYear"></h2>
+    <button id="nextMonth">▶</button>
+</header>
+
+<div class="day-names">
+    <div>Sun</div><div>Mon</div><div>Tue</div>
+    <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+<button class="fab" id="addEventBtn">+</button>
+
+</div>
+
+<div class="modal" id="eventModal">
+    <div class="modal-content">
+        <h3>Add Event</h3>
+        <input id="title" placeholder="Event Title">
+
+        <label>Start Date</label>
+        <input type="date" id="startDate" min="2026-01-01" max="2026-12-31">
+
+        <label>End Date</label>
+        <input type="date" id="endDate" min="2026-01-01" max="2026-12-31">
+
+        <label>Priority</label>
+        <select id="priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+
+        <label>Recurrence</label>
+        <select id="recurrence">
+            <option value="none">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+        </select>
+
+        <input id="team" placeholder="Team Members">
+        <input id="meetingLink" placeholder="Meeting Link (optional)">
+        <textarea id="agenda" placeholder="Agenda / Notes"></textarea>
+
+        <div class="modal-actions">
+            <button id="closeModal">Cancel</button>
+            <button id="saveEvent">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="event-detail" id="eventDetail">
+    <button class="close-detail" id="closeDetail">✕</button>
+    <div id="detailContent"></div>
+
+    <div class="detail-actions">
+        <button id="editEvent">✏️ Edit</button>
+        <button id="deleteEvent">🗑 Delete</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
