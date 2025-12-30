@@ -677,3 +677,43 @@ body.modal-open .modal * {
     }
 }
 
+/* =========================
+   FINAL MOBILE CALENDAR FIX
+   ========================= */
+@media (max-width: 600px) {
+
+    .calendar {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .day {
+        aspect-ratio: 1 / 1.35;   /* 🔥 controls height safely */
+        height: auto;             /* 🔥 let grid decide */
+        padding: 8px 6px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 14px;
+    }
+
+    .day span {
+        font-size: 12px;
+    }
+
+    .event-list {
+        max-height: 34px;
+        overflow: hidden;
+    }
+
+    .event-title {
+        font-size: 10px;
+        line-height: 1.2;
+        padding: 2px 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: 6px;
+    }
+}
