@@ -654,3 +654,25 @@ body.modal-open .modal * {
         text-overflow: ellipsis;
     }
 }
+/* =========================
+   MOBILE GRID SPACING FIX
+   ========================= */
+@media (max-width: 600px) {
+    .calendar {
+        grid-auto-rows: 72px;
+        row-gap: 10px;          /* 🔥 THIS is missing */
+        column-gap: 6px;
+        padding: 10px;
+    }
+}
+@media (max-width: 600px) {
+    .day {
+        height: 72px;
+        padding: 8px 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 12px;
+    }
+}
+
