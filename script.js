@@ -8,6 +8,24 @@ const YEAR = 2026;
 let currentMonth = 0;
 let events = JSON.parse(localStorage.getItem("events2026")) || [];
 let selectedEventIndex = null;
+// =========================
+// SIDEBAR TOGGLE LOGIC
+// =========================
+const sidebar = document.querySelector(".sidebar");
+const menuBtn = document.getElementById("menuBtn");
+
+menuBtn.onclick = () => {
+    sidebar.classList.toggle("open");
+};
+document.addEventListener("click", (e) => {
+    if (
+        sidebar.classList.contains("open") &&
+        !sidebar.contains(e.target) &&
+        !menuBtn.contains(e.target)
+    ) {
+        sidebar.classList.remove("open");
+    }
+});
 
 function renderCalendar() {
     calendar.innerHTML = "";

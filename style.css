@@ -412,3 +412,109 @@ header {
 }
 
 
+
+
+/* =========================
+   HAMBURGER SIDEBAR TOGGLE
+   ========================= */
+
+/* Hamburger button */
+.menu-btn {
+    background: none;
+    border: none;
+    font-size: 22px;      /* icon size stays same */
+    color: white;
+    cursor: pointer;
+
+    height: 64px;        /* ⬆ button height */
+    width: 64px;         /* square tap target */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px; /* optional: nicer touch feel */
+}
+
+
+/* Sidebar hidden by default */
+.sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+/* Sidebar open state */
+.sidebar.open {
+    transform: translateX(0);
+}
+
+/* Main content should NOT shift */
+.main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+/* Desktop: sidebar opens as overlay */
+@media (min-width: 901px) {
+    .sidebar {
+        box-shadow: 10px 0 40px rgba(0,0,0,0.6);
+    }
+}
+/* =========================
+   TALLER HEADER + BUTTONS
+   ========================= */
+
+.calendar-header {
+    min-height: 108px;          /* overall header height */
+    padding: 20px 18px;        /* vertical + horizontal spacing */
+    display: flex;
+    align-items: center;
+    background: #020617;
+}
+
+/* Header buttons (menu, prev, next) */
+.calendar-header button {
+    height: 64px;              /* button height */
+    min-width: 64px;           /* square tap target */
+    padding: 0 14px;
+    font-size: 18px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Month title */
+.month-title h2 {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+
+/* Left buttons */
+#menuBtn,
+#prevMonth {
+    z-index: 2;
+}
+
+/* Right button */
+#nextMonth {
+    margin-left: auto;
+    z-index: 2;
+}
+
+/* PERFECTLY centered title */
+.month-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none; /* prevents click blocking */
+}
+
+.month-title h2 {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
