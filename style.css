@@ -664,52 +664,38 @@ body.modal-open .modal * {
    ========================= */
 @media (max-width: 600px) {
 
-    /* ===== CALENDAR GRID ===== */
     .calendar {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
-        row-gap: 26px;          /* vertical spacing */
-        column-gap: 20px;       /* horizontal spacing */
-        padding: 8px;
+        gap: 25px;
+        padding: 5px;
     }
 
-    /* ===== DAY CELL ===== */
     .day {
-        aspect-ratio: 1 / 1.3;   /* balanced height */
-        padding: 6px;
+        aspect-ratio: 1 / 1.35;   /* 🔥 controls height safely */
+        height: auto;             /* 🔥 let grid decide */
+        padding: 8px 6px;
         overflow: hidden;
-
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-
         border-radius: 14px;
     }
 
-    /* ===== DATE NUMBER ===== */
     .day span {
         font-size: 12px;
-        font-weight: 500;
     }
 
-    /* ===== EVENTS ===== */
     .event-list {
-        max-height: 32px;
+        max-height: 34px;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
     }
 
     .event-title {
         font-size: 10px;
         line-height: 1.2;
         padding: 2px 4px;
-        border-radius: 6px;
-
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        border-radius: 6px;
     }
 }
-
